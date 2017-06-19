@@ -1,7 +1,9 @@
 package application;
 
+//Hospital Remote Object Implementation
 public class Hospital
 {
+	//Retrieve medical record for a user
 	public String GetMedicalRecord(String username)
 	{
 		//Access Medical Record Database

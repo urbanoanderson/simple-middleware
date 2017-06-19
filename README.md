@@ -1,10 +1,12 @@
-Middleware project for class IF711 (2017.1)
+**Middleware project for class IF711 (2017.1)**
 
-Professor:	Nelson Rosa (nsr@cin.ufpe.br)
-Students:	Anderson Urbano (aafu@cin.ufpe.br)
-			Isabela Rangel (igr@cin.ufpe.br)
-			Italo Roberto (irss@cin.ufpe.br)
-			Pedro Queiroz (phql@cin.ufpe.br)
+**Professor**:	Nelson Rosa (nsr@cin.ufpe.br)
+
+**Students**:	
+			- Anderson Urbano (aafu@cin.ufpe.br)  
+			- Isabela Rangel (igr@cin.ufpe.br)  
+			- Italo Roberto (irss@cin.ufpe.br)  
+			- Pedro Queiroz (phql@cin.ufpe.br)
 
 #-------------------------------------------
 #DESCRIPTION

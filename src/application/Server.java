@@ -29,10 +29,11 @@ public class Server extends JPanel
 	    
 	    frame.setVisible(true);
 	    
-	    //Server loop to respond to requests
+	    //Server loop for responding to requests
+	    HospitalInvoker hospital_invoker = new HospitalInvoker();
+	    
 	    while(frame.isVisible())
 	    {	
-			HospitalInvoker hospital_invoker = new HospitalInvoker();
 			hospital_invoker.Invoke();
 	    }
 	}
