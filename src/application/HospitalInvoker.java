@@ -2,6 +2,7 @@ package application;
 
 import java.util.HashMap;
 
+import extra.Constant;
 import middleware.Invoker;
 import middleware.Marshaller;
 import middleware.ServerRequestHandler;
@@ -12,7 +13,7 @@ public class HospitalInvoker extends Invoker
 	
 	public HospitalInvoker(int hospital_service_port)
 	{
-		super(hospital_service_port);
+		super(hospital_service_port, Constant.HOSPITAL_SERVER_KEYPAIR);
 		this.server_request_handler = new ServerRequestHandler();
 		this.marshaller = new Marshaller();
 		this.hospital = new Hospital();

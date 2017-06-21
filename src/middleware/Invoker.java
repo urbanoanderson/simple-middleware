@@ -1,6 +1,8 @@
 package middleware;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.HashMap;
 
 public class Invoker
@@ -8,12 +10,16 @@ public class Invoker
 	protected ServerRequestHandler server_request_handler;
 	protected Marshaller marshaller;
 	protected int service_port;
+	private KeyPair server_keypair;
+	private Encryptor encryptor;
 	
-	public Invoker(int service_port)
+	public Invoker(int service_port, KeyPair server_keypair)
 	{
 		this.server_request_handler = new ServerRequestHandler();
 		this.marshaller = new Marshaller();
+		this.encryptor = new Encryptor();
 		this.service_port = service_port;
+		this.server_keypair = server_keypair;
 	}
 	
 	public int GetServicePort()
@@ -51,6 +57,9 @@ public class Invoker
 		
 		if(!marsh_request.equals(null))
 		{
+			//Undo cryptography
+			marsh_request = this.encryptor.Decrypt(marsh_request, this.server_keypair.getPrivate());
+			
 			//Unmarshal request
 			HashMap<String, Object> request = new HashMap<String, Object>();
 			try {
@@ -63,9 +72,10 @@ public class Invoker
 				e1.printStackTrace();
 			}
 			
-			//Process Request (Hospital Dependent)
+			//Process Request
 			String method_name = (String) request.get("method_name");
 			HashMap<String, Object> parameters = (HashMap<String, Object>) request.get("parameters");
+			PublicKey client_public_key = (PublicKey) parameters.get("client_public_key");
 			HashMap<String, Object> ret_message = ProcessRequest(method_name, parameters);
 			
 			//Marshal results
@@ -77,6 +87,9 @@ public class Invoker
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
+			
+			//Encrypt Results
+			marsh_ret = encryptor.Encrypt(marsh_ret, client_public_key);
 			
 			//Send ret_message with TCP
 			try {

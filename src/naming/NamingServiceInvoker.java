@@ -15,7 +15,7 @@ public class NamingServiceInvoker extends Invoker
 	
 	public NamingServiceInvoker()
 	{
-		super(Constant.NAMING_SERVER_PORT);
+		super(Constant.NAMING_SERVER_PORT, Constant.NAMING_SERVER_KEYPAIR);
 		this.server_request_handler = new ServerRequestHandler();
 		this.marshaller = new Marshaller();
 		this.naming_service = new NamingService();
