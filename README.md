@@ -23,13 +23,16 @@ This Project is implemented in Java with Eclipse
 #HOW TO RUN
 #-------------------------------------------
 
-Open project with eclipse, start the server by
-running 'Server.java' in the 'application'
-package. It will open a window to indicate that
-the server is running. You can close the server
-by clicking on the close button at the window. 
+Open project with eclipse, start the naming service
+by running 'NamingServiceServer.java' in the 'naming'
+package. It will open a window to indicate that the
+naming server is running.
 
-To start the client by running 'Client.java' in
-the 'application' package. It will make a request
-and print the received output from server to the
-console. 
+Next, you have to start the application server by 
+running 'HospitalServer.java' in the 'application'
+package. Another window will pop.
+
+Finally, you can run the client program to make 
+requests by running 'HospitalClient.java' in the 
+'application' package. It will make a request and print
+the received output from HospitalServer to the console.
