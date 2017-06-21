@@ -1,17 +1,18 @@
-package middleware;
+package application;
 
 import java.util.HashMap;
 
-import application.Hospital;
+import middleware.Invoker;
+import middleware.Marshaller;
+import middleware.ServerRequestHandler;
 
 public class HospitalInvoker extends Invoker
 {
 	private Hospital hospital;
-	private static final int HOSPITAL_SERVICE_PORT = 2000;
 	
-	public HospitalInvoker()
+	public HospitalInvoker(int hospital_service_port)
 	{
-		super(HOSPITAL_SERVICE_PORT);
+		super(hospital_service_port);
 		this.server_request_handler = new ServerRequestHandler();
 		this.marshaller = new Marshaller();
 		this.hospital = new Hospital();

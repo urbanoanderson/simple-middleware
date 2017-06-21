@@ -16,6 +16,11 @@ public class Invoker
 		this.service_port = service_port;
 	}
 	
+	public int GetServicePort()
+	{
+		return this.service_port;
+	}
+	
 	//This method should be overridden by subclasses
 	public HashMap<String, Object> ProcessRequest(String method_name, HashMap<String, Object> parameters)
 	{

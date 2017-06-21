@@ -19,7 +19,7 @@ public class ServerRequestHandler
 	
 	public void establishTCP(int port) throws IOException
 	{
-		welcomeSocket= new ServerSocket(port);
+		welcomeSocket = new ServerSocket(port);
 		connectionSocket = welcomeSocket.accept();
 		//connectionSocket.setKeepAlive(true);
 		//connectionSocket.setTcpNoDelay(true);

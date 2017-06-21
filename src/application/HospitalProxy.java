@@ -1,12 +1,17 @@
-package middleware;
+package application;
 
+import java.security.PublicKey;
 import java.util.HashMap;
+
+import middleware.ClientProxy;
 
 public class HospitalProxy extends ClientProxy
 {
-	public HospitalProxy(String remote_obj_host, int remote_obj_port)
+	private static final long serialVersionUID = 929690120228542281L;
+
+	public HospitalProxy(String remote_obj_host, int remote_obj_port, PublicKey remote_obj_public_key)
 	{
-		super(remote_obj_host, remote_obj_port);
+		super(remote_obj_host, remote_obj_port, remote_obj_public_key);
 	}
 	
 	public String GetMedicalRecord(String username)

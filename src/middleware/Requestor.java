@@ -2,29 +2,36 @@ package middleware;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-
+import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.HashMap;
 
 public class Requestor
 {
 	private String host;
 	private int port;
+	private KeyPair client_keypair;
+	private PublicKey server_public_key;
 	
 	private Marshaller marshaller;
+	private Encryptor encryptor;
 	private ClientRequestHandler client_request_handler;
 	
-	public Requestor(String host, int port)
+	public Requestor(String host, int port, PublicKey server_public_key, KeyPair client_keypair)
 	{
 		this.host = host;
 		this.port = port;
+		this.client_keypair = client_keypair;
+		this.server_public_key = server_public_key;
 		this.marshaller = new Marshaller();
+		this.encryptor = new Encryptor();
 		this.client_request_handler = new ClientRequestHandler(this.host, this.port);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public Object Request(String method_name, HashMap<String, Object> parameters)
 	{
-		//Every Invocation Establishes a new TCP Connection
+		//Every Request Establishes a new TCP Connection
 		try {
 			client_request_handler.establishTCP();
 		} catch (UnknownHostException e) {
@@ -33,10 +40,11 @@ public class Requestor
 			e.printStackTrace();
 		}
 		
-		//Creates message from method name and parameters
+		//Creates message from method name and parameters and client public key
 		HashMap<String, Object> message = new HashMap<String, Object>();
 		message.put("method_name", method_name);
 		message.put("parameters", (Object) parameters);
+		message.put("client_public_key", (Object) this.client_keypair.getPublic());
 		
 		//Marshal message
 		byte [] marsh_msg = null;
@@ -47,6 +55,9 @@ public class Requestor
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
+		
+		//Encrypt Message
+		marsh_msg = encryptor.Encrypt(marsh_msg, this.server_public_key);
 		
 		//Send message through ClientRequestHandler
 		try {
@@ -64,6 +75,9 @@ public class Requestor
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+		
+		//Decrypt answer
+		marsh_ret = this.encryptor.Decrypt(marsh_ret, this.client_keypair.getPrivate());
 		
 		//Unmarshal results
 		HashMap<String, Object> ret_message = new HashMap<String, Object>();
