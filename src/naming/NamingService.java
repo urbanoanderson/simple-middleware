@@ -3,27 +3,8 @@ package naming;
 import java.security.PublicKey;
 import java.util.HashMap;
 
-import application.HospitalProxy;
-import middleware.ClientProxy;
-
 public class NamingService 
-{
-	class Service
-	{
-		public String name;
-		public String host;
-		public int port;
-		public PublicKey public_key;
-		
-		public Service(String name, String host, int port, PublicKey public_key)
-		{
-			this.name = name;
-			this.host = host;
-			this.port = port;
-			this.public_key = public_key;
-		}
-	}
-	
+{	
 	//Database of services
 	HashMap<String, Service> service_database;
 		
@@ -40,18 +21,12 @@ public class NamingService
 	}
 	
 	//Method for getting a proxy for a specific service
-	ClientProxy LookupService(String service_name)
-	{
-		ClientProxy client_proxy = null;
-		
+	Service LookupService(String service_name)
+	{		
 		//Access Database of Services 
 		Service service = this.service_database.get(service_name);
 		
-		//Get the correct service
-		if(service_name.equals("hospital"))
-			client_proxy = (ClientProxy) new HospitalProxy(service.host, service.port, service.public_key);
-		
 		//Return the obtained service proxy
-		return client_proxy;
+		return service;
 	}
 }

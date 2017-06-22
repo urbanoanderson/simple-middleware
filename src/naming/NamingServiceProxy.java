@@ -8,8 +8,6 @@ import middleware.ClientProxy;
 
 public class NamingServiceProxy extends ClientProxy
 {
-	private static final long serialVersionUID = 929690145228542281L;
-
 	public NamingServiceProxy()
 	{
 		super(Constant.NAMING_SERVER_HOST,
@@ -31,13 +29,13 @@ public class NamingServiceProxy extends ClientProxy
 	}
 	
 	//Method for getting a proxy for a specific service
-	public ClientProxy LookupService(String service_name)
+	public Service LookupService(String service_name)
 	{
 		String method_name = "LookupService";
 		HashMap<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("service_name", service_name);
 		
-		return (ClientProxy) this.requestor.Request(method_name, parameters);
+		return (Service) this.requestor.Request(method_name, parameters);
 	}
 	
 	public String GetMedicalRecord(String username)

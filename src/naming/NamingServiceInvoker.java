@@ -4,7 +4,6 @@ import java.security.PublicKey;
 import java.util.HashMap;
 
 import extra.Constant;
-import middleware.ClientProxy;
 import middleware.Invoker;
 import middleware.Marshaller;
 import middleware.ServerRequestHandler;
@@ -46,8 +45,8 @@ public class NamingServiceInvoker extends Invoker
 		else if(method_name.equals("LookupService"))
 		{
 			String service_name = (String) parameters.get("service_name");
-			ClientProxy client_proxy = this.naming_service.LookupService(service_name);
-			ret_message.put(method_name, (Object) client_proxy);
+			Service service = this.naming_service.LookupService(service_name);
+			ret_message.put(method_name, (Object) service);
 		}
 		
 		return ret_message;
