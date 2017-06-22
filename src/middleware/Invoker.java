@@ -1,9 +1,10 @@
 package middleware;
 
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.HashMap;
+
+import extra.Constant;
 
 public class Invoker
 {
@@ -39,38 +40,21 @@ public class Invoker
 	public void Invoke()
 	{	
 		//Opens connection
-		try {
-			server_request_handler.establishTCP(this.service_port);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		server_request_handler.establishTCP(this.service_port);
 		
 		//Tries to receive request
 		byte [] marsh_request = null;
-		try {
-			marsh_request = server_request_handler.receiveTCP();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		marsh_request = server_request_handler.receiveTCP();
 		
 		if(!marsh_request.equals(null))
 		{
 			//Undo cryptography
-			marsh_request = this.encryptor.Decrypt(marsh_request, this.server_keypair.getPrivate());
+			if(Constant.USE_CRYPTOGRAPHY)
+				marsh_request = this.encryptor.Decrypt(marsh_request, this.server_keypair.getPrivate());
 			
 			//Unmarshal request
 			HashMap<String, Object> request = new HashMap<String, Object>();
-			try {
-				request = (HashMap<String, Object>) this.marshaller.Unmarshall(marsh_request);
-			} catch (ClassNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
+			request = (HashMap<String, Object>) this.marshaller.Unmarshall(marsh_request);
 			
 			//Process Request
 			String method_name = (String) request.get("method_name");
@@ -80,32 +64,17 @@ public class Invoker
 			
 			//Marshal results
 			byte [] marsh_ret = null;
-			try {
-				marsh_ret = this.marshaller.Marshall(ret_message);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
+			marsh_ret = this.marshaller.Marshall(ret_message);
 			
 			//Encrypt Results
-			marsh_ret = encryptor.Encrypt(marsh_ret, client_public_key);
+			if(Constant.USE_CRYPTOGRAPHY)
+				marsh_ret = encryptor.Encrypt(marsh_ret, client_public_key);
 			
 			//Send ret_message with TCP
-			try {
-				this.server_request_handler.sendTCP(marsh_ret);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+			this.server_request_handler.sendTCP(marsh_ret);
 		}
 		
 		//Closes Connection
-		try {
-			server_request_handler.closeTCP();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		server_request_handler.closeTCP();
 	}
 }

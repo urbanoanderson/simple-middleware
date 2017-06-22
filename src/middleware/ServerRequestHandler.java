@@ -13,46 +13,60 @@ public class ServerRequestHandler
 	private DataOutputStream outToClient = null;
 	private DataInputStream inFromClient = null;
 
-	public ServerRequestHandler()
+	public ServerRequestHandler() {}
+	
+	public void establishTCP(int port)
 	{
+		try {
+			welcomeSocket = new ServerSocket(port);
+			connectionSocket = welcomeSocket.accept();
+			connectionSocket.setKeepAlive(true);
+			connectionSocket.setTcpNoDelay(true);
+			connectionSocket.setSoTimeout(1500);
+			outToClient= new DataOutputStream(connectionSocket.getOutputStream());
+			inFromClient = new DataInputStream(connectionSocket.getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void establishTCP(int port) throws IOException
+	public void closeTCP()
 	{
-		welcomeSocket = new ServerSocket(port);
-		connectionSocket = welcomeSocket.accept();
-		//connectionSocket.setKeepAlive(true);
-		//connectionSocket.setTcpNoDelay(true);
-		//connectionSocket.setSoTimeout(1500);
-		outToClient= new DataOutputStream(connectionSocket.getOutputStream());
-		inFromClient = new DataInputStream(connectionSocket.getInputStream());
-	}
-	
-	public void closeTCP() throws IOException
-	{
-		this.connectionSocket.close();
-		this.welcomeSocket.close();
-		this.outToClient.close();
-		this.inFromClient.close();
+		try {
+			this.connectionSocket.close();
+			this.welcomeSocket.close();
+			this.outToClient.close();
+			this.inFromClient.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void sendTCP(byte[] msg) throws IOException,InterruptedException
+	public void sendTCP(byte[] msg)
 	{
 		int sentMessageSize = msg.length;
-		System.out.println("message size: "+sentMessageSize);
-		outToClient.writeInt(sentMessageSize);
-		outToClient.write(msg);
-		//outToClient.flush();
+		
+		try {
+			outToClient.writeInt(sentMessageSize);
+			outToClient.write(msg);
+			outToClient.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public byte[] receiveTCP() throws IOException,InterruptedException
+	public byte[] receiveTCP()
 	{
 		byte[] msg = null;
-		
 		int receivedMessageSize = 0;
-		receivedMessageSize = inFromClient.readInt();
-		msg = new byte[receivedMessageSize];
-		inFromClient.read(msg,0,receivedMessageSize);
+		
+		try {
+			receivedMessageSize = inFromClient.readInt();
+			msg = new byte[receivedMessageSize];
+			inFromClient.read(msg,0,receivedMessageSize);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		return msg;
 	}

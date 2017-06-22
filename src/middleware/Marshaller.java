@@ -8,19 +8,39 @@ import java.io.ObjectOutputStream;
 
 public class Marshaller
 {
-	public byte [] Marshall(Object message) throws IOException, InterruptedException
+	public byte [] Marshall(Object message)
 	{
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-		ObjectOutputStream os = new ObjectOutputStream(byteStream);
-		os.writeObject(message);
+		ObjectOutputStream os;
+		try {
+			os = new ObjectOutputStream(byteStream);
+			os.writeObject(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		return byteStream.toByteArray();
 	}
 	
-	public Object Unmarshall(byte [] message) throws IOException,InterruptedException,ClassNotFoundException
+	public Object Unmarshall(byte [] message)
 	{
 		ByteArrayInputStream byteStream = new ByteArrayInputStream(message);
-		ObjectInputStream is = new ObjectInputStream(byteStream);
-		return is.readObject();
+		ObjectInputStream is = null;
+		try {
+			is = new ObjectInputStream(byteStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Object ret = null;
+		try {
+			 ret = is.readObject();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return ret;
 	}
 }

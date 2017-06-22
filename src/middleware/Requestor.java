@@ -1,10 +1,10 @@
 package middleware;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.HashMap;
+
+import extra.Constant;
 
 public class Requestor
 {
@@ -32,13 +32,7 @@ public class Requestor
 	public Object Request(String method_name, HashMap<String, Object> parameters)
 	{
 		//Every Request Establishes a new TCP Connection
-		try {
-			client_request_handler.establishTCP();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		client_request_handler.establishTCP();
 		
 		//Creates message from method name and parameters and client public key
 		HashMap<String, Object> message = new HashMap<String, Object>();
@@ -48,55 +42,29 @@ public class Requestor
 		
 		//Marshal message
 		byte [] marsh_msg = null;
-		try {
-			marsh_msg = this.marshaller.Marshall(message);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
+		marsh_msg = this.marshaller.Marshall(message);
 		
 		//Encrypt Message
-		marsh_msg = encryptor.Encrypt(marsh_msg, this.server_public_key);
+		if(Constant.USE_CRYPTOGRAPHY)
+			marsh_msg = encryptor.Encrypt(marsh_msg, this.server_public_key);
 		
 		//Send message through ClientRequestHandler
-		try {
-			this.client_request_handler.sendTCP(marsh_msg);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		this.client_request_handler.sendTCP(marsh_msg);
 		
 		//Receive return through ClientRequestHandler
 		byte [] marsh_ret = null;
-		try {
-			marsh_ret = this.client_request_handler.receiveTCP();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		marsh_ret = this.client_request_handler.receiveTCP();
 		
 		//Decrypt answer
-		marsh_ret = this.encryptor.Decrypt(marsh_ret, this.client_keypair.getPrivate());
+		if(Constant.USE_CRYPTOGRAPHY)
+			marsh_ret = this.encryptor.Decrypt(marsh_ret, this.client_keypair.getPrivate());
 		
 		//Unmarshal results
 		HashMap<String, Object> ret_message = new HashMap<String, Object>();
-		try {
-			ret_message = (HashMap<String, Object>) this.marshaller.Unmarshall(marsh_ret);
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
+		ret_message = (HashMap<String, Object>) this.marshaller.Unmarshall(marsh_ret);
 		
 		//End the TCP connection
-		try {
-			client_request_handler.closeTCP();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		client_request_handler.closeTCP();
 		
 		//Return results
 		return ret_message.get(method_name);

@@ -19,4 +19,6 @@ public final class Constant
     public static final KeyPair HOSPITAL_SERVER_KEYPAIR = Encryptor.GenerateKeyPair();
     public static final PublicKey HOSPITAL_SERVER_PUBLIC_KEY = HOSPITAL_SERVER_KEYPAIR.getPublic();
     public static final PrivateKey HOSPITAL_SERVER_PRIVATE_KEY = HOSPITAL_SERVER_KEYPAIR.getPrivate();
+    
+    public static final boolean USE_CRYPTOGRAPHY = false;
 }
