@@ -11,9 +11,9 @@ public class ClientRequestHandler
 	private String host;
 	private int port;
 	
-	private Socket clientSocket = null;
-	private DataOutputStream outToServer = null;
-	private DataInputStream inFromServer = null;
+	private Socket socket = null;
+	private DataInputStream dataInputStream = null;
+	private DataOutputStream dataOutputStream = null;
 	
 	public ClientRequestHandler(String host, int port)
 	{
@@ -23,13 +23,12 @@ public class ClientRequestHandler
 	
 	public void establishTCP()
 	{
+		System.out.println("ClientRequestHandler: establishing connection to " + this.host + ":" + this.port);
+		
 		try {
-			this.clientSocket = new Socket(this.host, this.port);
-			this.clientSocket.setKeepAlive(true);
-			this.clientSocket.setTcpNoDelay(true);
-			this.clientSocket.setSoTimeout(1500);
-			this.outToServer = new DataOutputStream(clientSocket.getOutputStream());
-			this.inFromServer = new DataInputStream(clientSocket.getInputStream());
+			this.socket = new Socket(this.host, this.port);
+			this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
+			this.dataInputStream = new DataInputStream(socket.getInputStream());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -39,10 +38,12 @@ public class ClientRequestHandler
 	
 	public void closeTCP()
 	{
+		System.out.println("ClientRequestHandler: closing connection");
+		
 		try {
-			clientSocket.close();
-			outToServer.close();
-			inFromServer.close();
+			socket.close();
+			dataOutputStream.close();
+			dataInputStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -52,11 +53,9 @@ public class ClientRequestHandler
 	{
 		System.out.println("ClientRequestHandler: sending message to " + this.host + ":" + this.port);
 		
-		int sentMessageSize = msg.length;
 		try {
-			outToServer.writeInt(sentMessageSize);
-			outToServer.write(msg ,0,sentMessageSize);
-			outToServer.flush();
+			dataOutputStream.writeInt(msg.length);
+			dataOutputStream.write(msg);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -67,18 +66,16 @@ public class ClientRequestHandler
 		System.out.println("ClientRequestHandler: receiving message");
 		
 		byte[] msg = null;
-		
-		int receivedMessageSize = 0;
+		int length;
 		try {
-			receivedMessageSize = inFromServer.readInt();
-			
-			if(receivedMessageSize != 0)
-			{
-				msg = new byte [receivedMessageSize];
-				inFromServer.read(msg, 0, receivedMessageSize);
+			length = dataInputStream.readInt();
+			if(length > 0) {
+			    byte[] message = new byte[length];
+			    dataInputStream.readFully(message, 0, message.length);
+			    msg = message;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 		
 		return msg;

@@ -8,23 +8,22 @@ import java.net.Socket;
 
 public class ServerRequestHandler
 {
-	private Socket connectionSocket = null;
-	private ServerSocket welcomeSocket = null;
-	private DataOutputStream outToClient = null;
-	private DataInputStream inFromClient = null;
+	private Socket socket = null;
+	private ServerSocket serverSocket = null;
+	private DataOutputStream dataOutputStream = null;
+	private DataInputStream dataInputStream = null;
 
 	public ServerRequestHandler() {}
 	
 	public void establishTCP(int port)
 	{
+		System.out.println("ServerRequestHandler: establishing connection at port " + port);
+		
 		try {
-			welcomeSocket = new ServerSocket(port);
-			connectionSocket = welcomeSocket.accept();
-			connectionSocket.setKeepAlive(true);
-			connectionSocket.setTcpNoDelay(true);
-			connectionSocket.setSoTimeout(1500);
-			outToClient= new DataOutputStream(connectionSocket.getOutputStream());
-			inFromClient = new DataInputStream(connectionSocket.getInputStream());
+			serverSocket = new ServerSocket(port);
+			socket = serverSocket.accept();
+			dataOutputStream= new DataOutputStream(socket.getOutputStream());
+			dataInputStream = new DataInputStream(socket.getInputStream());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -32,24 +31,25 @@ public class ServerRequestHandler
 	
 	public void closeTCP()
 	{
+		System.out.println("ServerRequestHandler: closing connection");
+		
 		try {
-			this.connectionSocket.close();
-			this.welcomeSocket.close();
-			this.outToClient.close();
-			this.inFromClient.close();
+			this.socket.close();
+			this.serverSocket.close();
+			this.dataOutputStream.close();
+			this.dataInputStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void sendTCP(byte[] msg)
-	{
-		int sentMessageSize = msg.length;
+	{	
+		System.out.println("ServerRequestHandler: sending message");
 		
 		try {
-			outToClient.writeInt(sentMessageSize);
-			outToClient.write(msg);
-			outToClient.flush();
+			dataOutputStream.writeInt(msg.length);
+			dataOutputStream.write(msg);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -57,13 +57,18 @@ public class ServerRequestHandler
 	
 	public byte[] receiveTCP()
 	{
-		byte[] msg = null;
-		int receivedMessageSize = 0;
+		System.out.println("ServerRequestHandler: receiving message");
 		
+		byte[] msg = null;
+		int length;
 		try {
-			receivedMessageSize = inFromClient.readInt();
-			msg = new byte[receivedMessageSize];
-			inFromClient.read(msg,0,receivedMessageSize);
+			length = dataInputStream.readInt();
+			if(length > 0)
+			{
+			    byte[] message = new byte[length];
+			    dataInputStream.readFully(message, 0, message.length);
+			    msg = message;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

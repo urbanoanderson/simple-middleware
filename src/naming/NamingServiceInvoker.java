@@ -22,9 +22,9 @@ public class NamingServiceInvoker extends Invoker
 		
 		//Add naming service information to database
 		this.naming_service.AddService("hospital",
-				 Constant.HOSPITAL_SERVER_HOST,
-				 Constant.HOSPITAL_SERVER_PORT,
-				 Constant.HOSPITAL_SERVER_PUBLIC_KEY);
+				 Constant.NAMING_SERVER_HOST,
+				 Constant.NAMING_SERVER_PORT,
+				 Constant.NAMING_SERVER_PUBLIC_KEY);
 	}
 	
 	public HashMap<String, Object> ProcessRequest(String method_name, HashMap<String, Object> parameters)
@@ -39,6 +39,7 @@ public class NamingServiceInvoker extends Invoker
 			int port = (int) parameters.get("port");
 			PublicKey public_key = (PublicKey) parameters.get("public_key");
 			this.naming_service.AddService(name, host, port, public_key);
+			ret_message.put(method_name, "DONE");
 		}
 		
 		//Process LookupService method
