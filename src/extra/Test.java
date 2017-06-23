@@ -9,10 +9,7 @@ import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.crypto.BadPaddingException;
@@ -25,7 +22,15 @@ import naming.Service;
 
 public class Test
 {	
-	//Class for Reflection test
+	public static void main(String [] args) throws InvalidKeyException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
+	{
+		//ReflectionTest();
+		//SymmetricEncryptionTest();
+		//AsymmetricEncryptionTest();
+		MessageSimulationTest();
+	}
+	
+	//Sample Class for Reflection test
 	static public class A
 	{		
 		public void Method1(String str)
@@ -49,14 +54,6 @@ public class Test
 			Service service = new Service(name, host, port, public_key);
 			service_database.put(name, service);
 		}
-	}
-	
-	public static void main(String [] args) throws InvalidKeyException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
-	{
-		ReflectionTest();
-		//AsymmetricEncryptionTest();
-		//SymmetricEncryptionTest();
-		//MessageSimulationTest();
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -91,79 +88,36 @@ public class Test
 	}
 	
 	public static void SymmetricEncryptionTest() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
-	{		
-		//Message to send
-		String plain_text = "HelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorld";
-		
+	{
 		Encryptor encryptor = new Encryptor();
 		byte[] key = Encryptor.GenerateSymmetricKey();
-		byte[] enc_message = encryptor.EncryptSymmetric(plain_text.getBytes(), key);
+		
+		String message = "HelloWorld";
+		byte[] enc_message = encryptor.EncryptSymmetric(message.getBytes(), key);
         byte[] dec_message = encryptor.DecryptSymmetric(enc_message, key);
 		
         System.out.println(new String(dec_message));
 	}
 		
-	@SuppressWarnings({ "unchecked" })
 	public static void AsymmetricEncryptionTest() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException
 	{		
-		//-----------------------------------
-
 		Encryptor encryptor = new Encryptor();
-		Marshaller marshaller = new Marshaller();
-		KeyPair keyPair = Encryptor.GenerateAsymmetricKeyPair();
-		PublicKey public_key = keyPair.getPublic();
-		PrivateKey private_key = keyPair.getPrivate();
-		byte[] public_key_bytes = public_key.getEncoded();
-		byte[] private_key_bytes = private_key.getEncoded();
+		KeyPair key_pair = Encryptor.GenerateAsymmetricKeyPair();
+		byte[] public_key = key_pair.getPublic().getEncoded();
+		byte[] private_key = key_pair.getPrivate().getEncoded();
 		
 		//Information to send
-		String method_name = "HelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorld";
-		
-		//Create Content
-		HashMap<String, Object> content = new HashMap<String, Object>();
-		content.put("method_name", method_name);
-		
-		//Marshal and encrypt content
-		byte[] marsh_content = marshaller.Marshall(content);
-		byte[] enc_content = encryptor.EncryptAsymmetric(marsh_content, public_key_bytes);
-		
-		//Create message
-		ArrayList<byte[]> pub_key_obj = new ArrayList<byte[]>();
-		pub_key_obj.add(public_key_bytes);
-		
-		HashMap<String, Object> message = new HashMap<String, Object>();
-		message.put("content", enc_content);
-		message.put("public_key", pub_key_obj);
-		
-		//Marshal message
-		byte[] marsh_message = marshaller.Marshall(message);
-		
-		//Send message
-		//...
-
-		//----------------------------------------
-		
-		//Receive message
-		//...
-		
-		//Unmarshal message
-		HashMap<String, Object> unmarsh_message = (HashMap<String, Object>) marshaller.Unmarshall(marsh_message);
-		byte[] enc_content2 = (byte[]) unmarsh_message.get("content");
-		
-		//Decrypt and Unmarshal content
-		byte[] dec_content = encryptor.DecryptAsymmetric(enc_content2, private_key_bytes);
-		HashMap<String, Object> content2 = (HashMap<String, Object>) marshaller.Unmarshall(dec_content);
+		String message = "HelloWorld";
+		byte[] enc_message = encryptor.EncryptAsymmetric(message.getBytes(), public_key);
+		byte[] dec_message = encryptor.DecryptAsymmetric(enc_message, private_key);
 		
 		//Print information from content
-		String info = (String) content2.get("method_name");
-		System.out.println(info);
+		System.out.println(new String(dec_message));
 	}
 	
 	@SuppressWarnings({ "unchecked" })
 	public static void MessageSimulationTest() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException
 	{		
-		//-----------------------------------
-
 		Encryptor encryptor = new Encryptor();
 		Marshaller marshaller = new Marshaller();
 		KeyPair keyPair = Encryptor.GenerateAsymmetricKeyPair();
