@@ -5,6 +5,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import extra.Constant;
+import middleware.Invoker;
+
 public class NamingServiceServer extends JPanel
 {	
 	private static final long serialVersionUID = 3658763986086752526L;
@@ -12,7 +15,11 @@ public class NamingServiceServer extends JPanel
 	public static void main(String [] args)
 	{
 		//Invoker for attending to requests
-		NamingServiceInvoker naming_service_invoker = new NamingServiceInvoker();
+		NamingService naming_service_obj = new NamingService();
+		Invoker naming_service_invoker = new Invoker(naming_service_obj,
+													 Constant.NAMING_SERVER_PORT,
+													 Constant.NAMING_SERVER_PUBLIC_KEY,
+													 Constant.NAMING_SERVER_PRIVATE_KEY);
 
 		//Window for Server controlling
 		JLabel label1 = new JLabel("Naming Server Status");

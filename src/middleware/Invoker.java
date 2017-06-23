@@ -1,7 +1,7 @@
 package middleware;
 
-import java.security.KeyPair;
-import java.security.PublicKey;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import extra.Constant;
@@ -10,30 +10,57 @@ public class Invoker
 {
 	protected ServerRequestHandler server_request_handler;
 	protected Marshaller marshaller;
-	protected int service_port;
-	private KeyPair server_keypair;
 	private Encryptor encryptor;
 	
-	public Invoker(int service_port, KeyPair server_keypair)
+	protected byte[] server_public_key;
+	protected byte[] server_private_key;
+	protected Integer service_port;
+	
+	protected Object remote_object;
+	
+	public Invoker(Object remote_object, Integer service_port, byte[] server_public_key, byte[] server_private_key)
 	{
 		this.server_request_handler = new ServerRequestHandler();
 		this.marshaller = new Marshaller();
 		this.encryptor = new Encryptor();
 		this.service_port = service_port;
-		this.server_keypair = server_keypair;
+		this.server_public_key = server_public_key;
+		this.server_private_key = server_private_key;
+		this.remote_object = remote_object;
 	}
 	
-	public int GetServicePort()
+	public Integer GetServicePort()
 	{
 		return this.service_port;
 	}
 	
 	//This method should be overridden by subclasses
-	public HashMap<String, Object> ProcessRequest(String method_name, HashMap<String, Object> parameters)
-	{
+	@SuppressWarnings("rawtypes")
+	public Object ProcessRequest(String method_name, Object[] parameters)
+	{ 
+		//Get parameter type list for method
+		Class[] param_types = new Class[parameters.length];
+		for(int i = 0; i < parameters.length; i++)
+			param_types[i] = parameters[i].getClass();
+		
+		//Invoke method on remote object
+		Object return_value = null;
+		try {
+			Method method = this.remote_object.getClass().getMethod(method_name, param_types);
+			return_value = method.invoke(this.remote_object, parameters);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+			e.getMessage();
+		}
+		
 		//Return empty message
-		HashMap<String, Object> ret_message = new HashMap<String, Object>();
-		return ret_message;
+		return return_value;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -43,32 +70,45 @@ public class Invoker
 		server_request_handler.establishTCP(this.service_port);
 		
 		//Tries to receive request
-		byte [] marsh_request = null;
-		marsh_request = server_request_handler.receiveTCP();
+		byte [] marsh_request = server_request_handler.receiveTCP();
 		
 		if(!marsh_request.equals(null))
 		{
-			//Undo cryptography
+			//##########################################################
+			
+			//Unmarshal message
+			HashMap<String, Object> unmarsh_message = (HashMap<String, Object>) marshaller.Unmarshall(marsh_request);
+			byte[] encrypted_symmetric_key = (byte[]) unmarsh_message.get("encrypted_symmetric_key");
+			byte[] enc_content = (byte[]) unmarsh_message.get("content");
+			
+			//Decrypt client symmetric key using server private key
+			byte[] client_symmetric_key = encryptor.DecryptAsymmetric(encrypted_symmetric_key, this.server_private_key);
+			
+			//Decrypt request content
+			byte[] dec_content = enc_content;
 			if(Constant.USE_CRYPTOGRAPHY)
-				marsh_request = this.encryptor.Decrypt(marsh_request, this.server_keypair.getPrivate());
+				dec_content = encryptor.DecryptSymmetric(enc_content, client_symmetric_key);
 			
 			//Unmarshal request
-			HashMap<String, Object> request = new HashMap<String, Object>();
-			request = (HashMap<String, Object>) this.marshaller.Unmarshall(marsh_request);
+			HashMap<String, Object> request = (HashMap<String, Object>) marshaller.Unmarshall(dec_content);
+			
+			//##########################################################
 			
 			//Process Request
 			String method_name = (String) request.get("method_name");
-			HashMap<String, Object> parameters = (HashMap<String, Object>) request.get("parameters");
-			PublicKey client_public_key = (PublicKey) parameters.get("client_public_key");
-			HashMap<String, Object> ret_message = ProcessRequest(method_name, parameters);
+			Object[] parameters = (Object[]) request.get("parameters");
+			Object ret_obj = ProcessRequest(method_name, parameters);
+			
+			//##########################################################
 			
 			//Marshal results
-			byte [] marsh_ret = null;
-			marsh_ret = this.marshaller.Marshall(ret_message);
+			byte [] marsh_ret = this.marshaller.Marshall(ret_obj);
 			
 			//Encrypt Results
 			if(Constant.USE_CRYPTOGRAPHY)
-				marsh_ret = encryptor.Encrypt(marsh_ret, client_public_key);
+				marsh_ret = encryptor.EncryptSymmetric(marsh_ret, client_symmetric_key);
+			
+			//##########################################################
 			
 			//Send ret_message with TCP
 			this.server_request_handler.sendTCP(marsh_ret);

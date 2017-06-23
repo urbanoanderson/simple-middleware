@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import extra.Constant;
+import middleware.Invoker;
 import naming.NamingServiceProxy;
 
 public class HospitalServer extends JPanel
@@ -15,7 +16,11 @@ public class HospitalServer extends JPanel
 	public static void main(String [] args)
 	{
 		//Invoker for attending to requests
-		HospitalInvoker hospital_invoker = new HospitalInvoker(2001);
+		Hospital hospital_obj = new Hospital();
+		Invoker hospital_invoker = new Invoker(hospital_obj,
+											   Constant.HOSPITAL_SERVER_PORT,
+											   Constant.HOSPITAL_SERVER_PUBLIC_KEY,
+											   Constant.HOSPITAL_SERVER_PRIVATE_KEY);
 		
 		//Add Hospital Service to Naming Server
 		NamingServiceProxy naming_server = new NamingServiceProxy();

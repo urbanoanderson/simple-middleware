@@ -8,9 +8,13 @@ public class Hospital
 	{
 		//Access Medical Record Database
 		if(username.equals("Anderson Urbano"))
-			return "Healthy";
+			return "Has disease A";
 		else if(username.equals("Isabela Rangel"))
-			return "Not so much";
+			return "Has disease B";
+		else if(username.equals("Italo Roberto"))
+			return "Has disease C";
+		else if(username.equals("Pedro Queiroz"))
+			return "Has disease D";
 		else
 			return "User not known";
 	}
