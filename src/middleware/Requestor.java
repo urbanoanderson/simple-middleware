@@ -2,8 +2,6 @@ package middleware;
 
 import java.util.HashMap;
 
-import extra.Constant;
-
 public class Requestor
 {
 	private String server_host;
@@ -39,10 +37,9 @@ public class Requestor
 		//Marshal and symmetrically encrypt content
 		byte[] marsh_content = marshaller.Marshall(content);
 		byte[] enc_content = marsh_content;
-		byte[] symmetric_key = Encryptor.GenerateSymmetricKey();
+		byte[] symmetric_key = this.encryptor.GenerateSymmetricKey();
 		
-		if(Constant.USE_CRYPTOGRAPHY)
-			enc_content = encryptor.EncryptSymmetric(marsh_content, symmetric_key);
+		enc_content = encryptor.EncryptSymmetric(marsh_content, symmetric_key);
 		
 		//Asymmetrically encrypt the symmetric key with the server public key
 		byte[] encrypted_symmetric_key = encryptor.EncryptAsymmetric(symmetric_key, this.server_public_key);
@@ -64,8 +61,7 @@ public class Requestor
 		byte [] marsh_ret = this.client_request_handler.receiveTCP();
 		
 		//Decrypt answer
-		if(Constant.USE_CRYPTOGRAPHY)
-			marsh_ret = this.encryptor.DecryptSymmetric(marsh_ret, symmetric_key);
+		marsh_ret = this.encryptor.DecryptSymmetric(marsh_ret, symmetric_key);
 		
 		//Unmarshal results
 		 Object ret_message = (Object) this.marshaller.Unmarshall(marsh_ret);

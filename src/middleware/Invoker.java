@@ -4,8 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import extra.Constant;
-
 public class Invoker
 {
 	protected ServerRequestHandler server_request_handler;
@@ -86,8 +84,7 @@ public class Invoker
 			
 			//Decrypt request content
 			byte[] dec_content = enc_content;
-			if(Constant.USE_CRYPTOGRAPHY)
-				dec_content = encryptor.DecryptSymmetric(enc_content, client_symmetric_key);
+			dec_content = encryptor.DecryptSymmetric(enc_content, client_symmetric_key);
 			
 			//Unmarshal request
 			HashMap<String, Object> request = (HashMap<String, Object>) marshaller.Unmarshall(dec_content);
@@ -105,8 +102,7 @@ public class Invoker
 			byte [] marsh_ret = this.marshaller.Marshall(ret_obj);
 			
 			//Encrypt Results
-			if(Constant.USE_CRYPTOGRAPHY)
-				marsh_ret = encryptor.EncryptSymmetric(marsh_ret, client_symmetric_key);
+			marsh_ret = encryptor.EncryptSymmetric(marsh_ret, client_symmetric_key);
 			
 			//##########################################################
 			

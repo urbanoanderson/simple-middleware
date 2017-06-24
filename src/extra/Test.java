@@ -7,7 +7,6 @@ package extra;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
@@ -16,6 +15,9 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import cryptography.AES;
+import cryptography.AsymmetricKeyPair;
+import cryptography.RSA;
 import middleware.Encryptor;
 import middleware.Marshaller;
 import naming.Service;
@@ -27,7 +29,33 @@ public class Test
 		//ReflectionTest();
 		//SymmetricEncryptionTest();
 		//AsymmetricEncryptionTest();
-		MessageSimulationTest();
+		//MessageSimulationTest();
+		AESTest();
+		RSATest();
+	}
+	
+	public static void AESTest()
+	{
+		AES aes = new AES();
+		byte[] message = "HelloWorld".getBytes();
+		byte[] secret_key = aes.GenerateKey();
+		byte[] enc_message = aes.Encrypt(message, secret_key);
+		byte[] dec_message = aes.Decrypt(enc_message, secret_key);
+		System.out.println(new String(dec_message));
+	}
+	
+	public static void RSATest()
+	{
+		byte[] message = "HelloWorld".getBytes();
+		RSA rsa = new RSA();
+		
+		AsymmetricKeyPair key_pair = rsa.GenerateKeyPair();
+		byte[] public_key = key_pair.GetPublicKey();
+		byte[] private_key = key_pair.GetPrivateKey();
+		
+		byte[] enc_message = rsa.Encrypt(message, public_key);
+		byte[] dec_message = rsa.Decrypt(enc_message, private_key);
+		System.out.println(new String(dec_message));
 	}
 	
 	//Sample Class for Reflection test
@@ -90,7 +118,7 @@ public class Test
 	public static void SymmetricEncryptionTest() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
 	{
 		Encryptor encryptor = new Encryptor();
-		byte[] key = Encryptor.GenerateSymmetricKey();
+		byte[] key = encryptor.GenerateSymmetricKey();
 		
 		String message = "HelloWorld";
 		byte[] enc_message = encryptor.EncryptSymmetric(message.getBytes(), key);
@@ -102,9 +130,9 @@ public class Test
 	public static void AsymmetricEncryptionTest() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException
 	{		
 		Encryptor encryptor = new Encryptor();
-		KeyPair key_pair = Encryptor.GenerateAsymmetricKeyPair();
-		byte[] public_key = key_pair.getPublic().getEncoded();
-		byte[] private_key = key_pair.getPrivate().getEncoded();
+		AsymmetricKeyPair key_pair = encryptor.GenerateAsymmetricKeyPair();
+		byte[] public_key = key_pair.GetPublicKey();
+		byte[] private_key = key_pair.GetPrivateKey();
 		
 		//Information to send
 		String message = "HelloWorld";
@@ -120,10 +148,10 @@ public class Test
 	{		
 		Encryptor encryptor = new Encryptor();
 		Marshaller marshaller = new Marshaller();
-		KeyPair keyPair = Encryptor.GenerateAsymmetricKeyPair();
-		byte[] server_public_key = keyPair.getPublic().getEncoded();
-		byte[] server_private_key = keyPair.getPrivate().getEncoded();
-		byte[] client_symmetric_key = Encryptor.GenerateSymmetricKey();
+		AsymmetricKeyPair key_pair = encryptor.GenerateAsymmetricKeyPair();
+		byte[] server_public_key = key_pair.GetPublicKey();
+		byte[] server_private_key = key_pair.GetPrivateKey();
+		byte[] client_symmetric_key = encryptor.GenerateSymmetricKey();
 		
 		//Information to send
 		String method_name = "HelloWorld";
